@@ -1,0 +1,105 @@
+html, body, div, ul, li, ol, dl, dd, dt, p, h1, h2, h3, h4, h5, h6, form, a, img, span, em, i, b, iframe, strong, label {
+    padding: 0;
+    margin: 0;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+
+html {
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-size-adjust: none;
+}
+
+body {
+    font-size: 16px;
+    font-family: sans-serif;
+    color: #000;
+    background-color: #ececec;
+}
+
+article, aside, details, figcaption, figure, footer, header, hgroup, menu, main, nav, section, summary {
+    display: block;
+}
+
+ol, ul {
+    list-style: none;
+}
+
+a {
+    text-decoration: none;
+    color: #333;
+    cursor: pointer;
+    -webkit-touch-callout: none;
+}
+
+em, i {
+    font-style: normal;
+}
+
+img {
+    vertical-align: middle;
+    border: none;
+    -webkit-touch-callout: none;
+}
+
+a, input, select, textarea, button {
+    padding: 0;
+    margin: 0;
+    border: 0;
+    outline: 0;
+    border-radius: 0;
+    -webkit-appearance: none;
+}
+
+input:disabled {
+    background-color: #fff;
+}
+
+textarea {
+    resize: none;
+}
+
+table {
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+    background-color: transparent;
+}
+
+::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, .298039);
+    border-radius: 2px;
+}
+
+::-webkit-input-placeholder {
+    color: #666;
+    opacity: 1;
+}
+
+:-moz-placeholder {
+    color: #666;
+    opacity: 1;
+}
+
+::-moz-placeholder {
+    color: #666;
+    opacity: 1;
+}
+
+:-ms-input-placeholder {
+    color: #666;
+    opacity: 1;
+}
+
