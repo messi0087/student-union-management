@@ -4,7 +4,7 @@
     <!--        账号输入框-->
     <mu-text-field v-model="account"
                    class="account-input"
-                   label="Email"
+                   label="邮箱"
                    icon="email"
                    label-float
     />
@@ -12,7 +12,7 @@
     <mu-text-field v-model="password"
                    max-length="16"
                    class="password-input"
-                   label="Password"
+                   label="密码"
                    icon="lock"
                    label-float
                    :action-icon="visibility ? 'visibility_off' : 'visibility'"
@@ -23,14 +23,18 @@
     <mu-button round class="login-button" @click="loginClick()">登录</mu-button>
 
     <mu-dialog title="提示" width="400" :open.sync="showTipMessage" class="tip-message">
-      <span class="tip-message-font">{{tipMessage}}</span>
+      <span :class="this.loginSuccess ? 'tip-message-font-success' : 'tip-message-font'">{{tipMessage}}</span>
       <mu-button slot="actions" flat color="primary" @click="closeTipMessage">关闭</mu-button>
     </mu-dialog>
   </div>
 </template>
 
 <script>
-  import *as validate from '../../utils/validate'
+  import * as validate from '../../utils/validate'
+  import * as userAPI from '../../api/user'
+  import Cookies from 'js-cookie'
+  import config from '../../api/default'
+  const key = config.key
 
   export default {
     name: "login",
@@ -41,15 +45,45 @@
         password: '',
         isLogining: false,
         showTipMessage: false,
-        tipMessage: ''
+        tipMessage: '',
+        loginSuccess:false
+      }
+    },
+    mounted() {
+      let token = Cookies.get('authorization')
+      if( token ){
+        token = `${key} ${token}`
+        userAPI.getCurrent(token)
+          .then( res => {
+            this.showTipMessage = true
+            this.tipMessage = `登陆成功，欢迎您：${res.data.name}`
+            this.loginSuccess = true
+          })
+          .catch(error=>error.message)
       }
     },
     methods: {
       loginClick() {
         let result = validate.validateLogin(this.account, this.password);
         this.isLogining = result.condition;
+        const loginData = {
+          email: this.account,
+          password: this.password
+        }
         if (this.isLogining) {
-          this.$router.push('/mainPages/myNews')
+          userAPI.login(loginData)
+            .then(res=>{
+              if(res.data.status === 200){
+                this.showTipMessage = true
+                Cookies.set('authorization', res.data.token , { expires: 7 });
+                this.tipMessage = `登陆成功，欢迎您：${res.data.name}`
+                this.loginSuccess = true
+              }else{
+                this.showTipMessage = true
+                this.tipMessage = res.data.msg
+              }
+            })
+            .catch(error=>error.message)
         } else {
           this.tipMessage = result.errors.message
           this.showTipMessage = true
@@ -57,6 +91,9 @@
         }
       },
       closeTipMessage() {
+        if(this.loginSuccess){
+          this.$router.replace('/mainPages/myNews')
+        }
         this.showTipMessage =false
       }
     }
@@ -82,7 +119,7 @@
   }
 
   .login-button {
-    background-image: linear-gradient(left, #29bdd9 0%, #276ace 100%);
+    background-image: linear-gradient(to right, #29bdd9 0%, #276ace 100%);
     width: 70vw;
     height: 50px;
     font-size: 16px;
@@ -91,5 +128,9 @@
 
   .tip-message-font {
     color: #f34336;
+  }
+
+  .tip-message-font-success {
+    color: #2ecc71;
   }
 </style>

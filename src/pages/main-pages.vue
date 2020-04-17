@@ -23,6 +23,15 @@
 
 <script>
   import topMessage from '../components/top-message'
+  import Cookies from 'js-cookie'
+  import config from '../api/default'
+  const key = config.key
+  //引入muse的Message
+  import 'muse-ui-message/dist/muse-ui-message.css';
+  import Vue from 'vue';
+  import Message from 'muse-ui-message';
+  Vue.use(Message);
+
   export default {
     name: "main-pages",
     data() {
@@ -33,6 +42,19 @@
         addressBookUrl: '/mainPages/addressBook',
         commonFunctionsUrl: '/mainPages/commonFunctions',
         myInformationUrl: '/mainPages/myInformation',
+      }
+    },
+    beforeCreate() {
+      let token = Cookies.get('authorization')
+      if(!token){
+        Message.alert('身份信息失效请重新登录', '提示')
+          .then(res =>{
+            if(res.result) {
+              this.$router.replace('/')
+            }
+          })
+      }else {
+        this.$store.commit('setToken',`${key} ${token}`)
       }
     },
     computed:{

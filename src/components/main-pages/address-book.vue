@@ -2,10 +2,16 @@
   <div class="index-tree">
     <main class="main-tree">
         <a-tree
+                showLine
+                showIcon
                 @select="onSelect"
                 :treeData="bookData"
                 :selectedKeys="selectedKeys"
-        />
+                :expandedKeys="expandedKeys"
+                @expand="onExpand"
+        >
+          <a-icon type="down" slot="switcherIcon" />
+        </a-tree>
 
       <!--部门介绍-->
       <mu-dialog
@@ -41,7 +47,7 @@
           />
           <template class="ant-card-actions" slot="actions">
             <a-icon type="team" key="team"/>
-            <a href="tel:13764567708">  <a-icon type="phone"  key="phone"/></a>
+            <a :href='phone'>  <a-icon type="phone"  key="phone"/></a>
           </template>
           <a-card-meta :title="cardTitle" :description="cardDescription">
             <a-avatar
@@ -59,108 +65,21 @@
 <script>
   import Vue from 'vue'
   import {Button, Input, Tree, Icon, Tooltip, Card, message, Avatar} from 'ant-design-vue'
+  import * as userAPI from '../../api/user'
+  import * as getData from '../../utils/get-position'
+
+
   Vue.use(Button).use(message).use(Avatar).use(Input).use(Tree).use(Icon).use(Tooltip)
     .use(Card)
   Vue.config.productionTip = false
 
-  const bookData = [
-    {
-      title: '主席团',
-      key: '0-0',
-      children: [
-        {
-          title: '陈学冬主席',
-          key: '0-0-0',
-        },
-        {
-          title: '马学东副主席',
-          key: '0-0-1',
-        },
-        {
-          title: '袁雪飞主任',
-          key: '0-0-2',
-        },
-      ],
-    },
-    {
-      title: '老师',
-      key: '0-1',
-      children: [
-        {
-          title: '何老师',
-          key: '0-1-0',
-        },
-        {
-          title: '李老师',
-          key: '0-1-1',
-        },
-      ],
-    },
-    {
-      title: '体育部',
-      key: '0-2',
-      children: [
-        {
-          title: '陈丹丹部长',
-          key: '0-2-0',
-        },
-        {
-          title: '马学坤副部长',
-          key: '0-2-1',
-        },
-        {
-          title: '李丹丹干事',
-          key: '0-2-2',
-        },
-      ],
-    },
-    {
-      title: '文艺部',
-      key: '0-3',
-      children: [
-        {
-          title: '陈丹丹部长',
-          key: '0-3-0',
-        },
-      ],
-    },
-    {
-      title: '记者部',
-      key: '0-4',
-      children: [
-        {
-          title: '陈丹丹部长',
-          key: '0-4-0',
-        },
-      ],
-    },
-    {
-      title: '科竞部',
-      key: '0-5',
-      children: [
-        {
-          title: '陈丹丹部长',
-          key: '0-5-0',
-        },
-      ],
-    },
-    {
-      title: '办公室',
-      key: '0-6',
-      children: [
-        {
-          title: '陈丹丹部长',
-          key: '0-6-0',
-        },
-      ],
-    },
-  ];
   export default {
     name: 'my-news',
     data() {
       return {
-        bookData,
+        bookData:[],
         selectedKeys:[],
+        expandedKeys:[],
         openCard:false,
         openDepartment:false,
         cardTitle:'',
@@ -168,26 +87,34 @@
         departmentTitle:'',
         departmentDescription:'',
         cardPhoneNumber:'',
+        phone:''
       }
+    },
+    beforeMount(){
+      userAPI.getAddressBook()
+      .then(res=>{
+        this.bookData = this.updateTreeData(res.data.bookData)
+      })
+      .catch(error=>console.log(error.message))
     },
     methods: {
       onSelect(keys) {
-
+        let cardData = this.getKeyData(this.bookData,keys[0])
+        let condition = this.verifyData(cardData.title)
         //具体的人
-        if(keys[0] && keys[0].length>3) {
+        if(condition === -1 ) {
           this.selectedKeys = keys;
-          let cardData = this.getKeyData(bookData,keys[0])
           this.cardTitle = cardData.title
-          this.cardDescription = cardData.title
+          this.cardDescription = cardData.departments
+          this.phone = 'tel:' + cardData.phone
           // console.log('Trigger Select' + keys[0].length);
           this.openCard=true
         }
         //部门
-        else if(keys[0] && keys[0].length<=3){
+        else if(condition !== -1){
           this.selectedKeys = keys;
-          let departmentData = this.getKeyData(bookData,keys[0])
-          this.departmentTitle = departmentData.title
-          this.departmentDescription = departmentData.title
+          this.departmentTitle = cardData.title
+          this.departmentDescription = cardData.departmentDescription
           // console.log('Trigger Select' + keys[0].length, keys, event);
           this.openDepartment=true
         }
@@ -212,18 +139,46 @@
       closeDepartment(){
         this.selectedKeys=[]
         this.openDepartment=false
+      },
+      //更新数据
+      updateTreeData (treeData, key = '0') {
+        return treeData.map((item, index) => {
+          item.key = key + '-' + index
+          this.expandedKeys.push(item.key)
+          if(!item.title) {
+            item.title = `${item.name}${getData.getPosition(item.position)}`
+          }
+          if (item.children && item.children.length) {
+            item.children = this.updateTreeData(item.children, item.key)
+          }
+          return item
+        })
+      },
+      //验证部门和人
+      verifyData(data){
+        let department =['主席团', '老师', '文体中心','学办中心','团学中心', '新闻中心','科创中心',
+            '办公室','外联部','体育部','文艺部','组织部','青年志愿者协会','宣传部','记者部','科竞部','创业部']
+        return  department.findIndex(item => item === data)
+      },
+      onExpand (expandedKeys) {
+        this.expandedKeys = expandedKeys
       }
     }
   }
 </script>
 
 <style scoped>
+  .index-tree::-webkit-scrollbar {
+    display: none;
+  }
+
   .index-tree{
     height: 85vh;
     overflow: scroll;
-    overflow-x: hidden;
-    background: url("../../assets/imgs/addressBook-bg.jpg")  repeat ;
+    background: url("../../assets/imgs/addressBook-bg.jpg")  no-repeat ;
+    background-size:420px 620px;
   }
+
   .main-tree{
     position:relative ;
     left: 5vw;

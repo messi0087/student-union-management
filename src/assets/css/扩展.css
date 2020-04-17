@@ -1,0 +1,15 @@
+.ant-tree-title{
+  font-size: 18px;
+  color:#2c3e50;
+  font-family: system-ui;
+}
+
+.ant-tree.ant-tree-show-line li span.ant-tree-switcher{
+  background: none !important;
+}
+
+.ant-input{
+  border:1px solid rgb(205, 205, 205) !important;
+  background-color: rgba(227, 227, 227, 0.21) !important;
+}
+

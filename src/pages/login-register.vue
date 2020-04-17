@@ -11,7 +11,7 @@
         </main>
 
         <transition :name="direction">
-            <router-view/>
+            <router-view @changeURl="changeUrlPath"/>
         </transition>
         <!--    <HelloWorld msg="Welcome to Your Vue.js App"/>-->
     </div>
@@ -24,11 +24,14 @@
             return {
                 loginUrl: '/',
                 registerUrl: '/register',
-                shift: this.$route.path,
+                shift: '/',
                 direction:'slide-right'
             }
         },
         methods: {
+            changeUrlPath(){
+                this.shift='/'
+            }
         }
     }
 </script>
