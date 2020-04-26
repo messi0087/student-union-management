@@ -20,12 +20,12 @@
   import billReview from '../common-function/bill-review'
   import meetingRequest from '../common-function/meeting-request'
   export default {
-    name: 'my-news',
+    name: 'common-function',
     components: {announcement, billReview, meetingRequest},
     data() {
       return {
-        functionShow: 0,
-        defaultValue:'meetingRequest'
+        functionShow: Number(this.$route.query.functionShow? this.$route.query.functionShow:0),
+        defaultValue:this.$route.query.defaultValue? this.$route.query.defaultValue:'meetingRequest'
       }
     },
     methods: {

@@ -150,6 +150,12 @@
           if(res.data.status === 200){
             this.$toast.success(res.data.msg)
             this.getAnnouncementData()
+            this.$socket.emit('successAnnouncement', {
+              id:this.$store.state.id,
+              name:this.$store.state.name,
+              position:getData.getPosition(this.$store.state.position),
+              departments:this.$store.state.department
+            })
             this.closeAddCardMessage()
           }else {
             this.$toast.error(res.data.msg)

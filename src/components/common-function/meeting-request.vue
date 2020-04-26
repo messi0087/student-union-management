@@ -167,6 +167,10 @@
   //引入anti的时间选择
   import {DatePicker,Modal} from 'ant-design-vue'
   import locale from 'ant-design-vue/es/date-picker/locale/zh_CN';
+  import Cookies from 'js-cookie'
+  import config from '../../api/default'
+  const key = config.key
+
 
 
   Vue.config.productionTip = false
@@ -231,11 +235,16 @@
       },
       //获取数据
       getMyVerifyMeeting(){
-        meetingAPI.getVerifyMeeting(this.$store.state.token)
+        let token = Cookies.get('authorization')
+        meetingAPI.getVerifyMeeting(`${key} ${token}`)
           .then(res=>{
             if(res.data.status === 200) {
               this.myVerifyMeeting = res.data.meetingData
-              this.isMyVerifyMeeting = true
+              if(res.data.meetingData && res.data.meetingData.length===0 ){
+                this.isMyVerifyMeeting = false
+              }else {
+                this.isMyVerifyMeeting = true
+              }
             }else {
               this.isMyVerifyMeeting = false
             }
@@ -246,7 +255,11 @@
           .then(res=>{
             if(res.data.status === 200) {
               this.allMeeting = res.data.meetingData
-              this.isAllMeeting = true
+              if (res.data.meetingData && res.data.meetingData.length===0 ){
+                this.isAllMeeting = false
+              }else {
+                this.isAllMeeting = true
+              }
             }else {
               this.isAllMeeting = false
             }
@@ -257,7 +270,11 @@
           .then(res=>{
             if(res.data.status === 200) {
               this.myMeeting = res.data.meetingData
-              this.isMyMeeting = true
+              if (res.data.meetingData && res.data.meetingData.length===0 ){
+                this.isMyMeeting = false
+              }else {
+                this.isMyMeeting = true
+              }
             }else {
               this.isMyMeeting = false
             }
@@ -292,6 +309,12 @@
             .then(res =>{
               if(res.data.status===200){
                 this.$toast.success(res.data.msg)
+                this.$socket.emit('successMeeting', {
+                  id:this.$store.state.id,
+                  name:this.$store.state.name,
+                  position:this.$store.state.position,
+                  departments:this.$store.state.department
+                })
                 this.closeAddMeetingDialog()
                 this.getMyMeetingData()
               }else {

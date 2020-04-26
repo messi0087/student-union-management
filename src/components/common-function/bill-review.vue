@@ -165,6 +165,9 @@
   //引入anti的时间选择
   import {DatePicker,Modal} from 'ant-design-vue'
   import locale from 'ant-design-vue/es/date-picker/locale/zh_CN';
+  import Cookies from "js-cookie";
+  import config from '../../api/default'
+  const key = config.key
 
   Vue.config.productionTip = false
 
@@ -228,11 +231,16 @@
       },
       //获取数据
       getMyVerifyActivity(){
-        activityAPI.getVerifyActivity(this.$store.state.token)
+        let token = Cookies.get('authorization')
+        activityAPI.getVerifyActivity(`${key} ${token}`)
           .then(res=>{
             if(res.data.status === 200) {
               this.myVerifyActivity = res.data.activityData
-              this.isMyVerifyActivity = true
+              if( res.data.activityData && res.data.activityData.length ===0){
+                this.isMyVerifyActivity = false
+              }else {
+                this.isMyVerifyActivity = true
+              }
             }else {
               this.isMyVerifyActivity = false
             }
@@ -243,7 +251,11 @@
           .then(res=>{
             if(res.data.status === 200) {
               this.allActivity = res.data.activityData
-              this.isAllActivity = true
+              if( res.data.activityData && res.data.activityData.length ===0){
+                this.isAllActivity = false
+              }else {
+                this.isAllActivity = true
+              }
             }else {
               this.isAllActivity = false
             }
@@ -254,7 +266,11 @@
           .then(res=>{
             if(res.data.status === 200) {
               this.myActivity = res.data.activityData
-              this.isMyActivity = true
+              if( res.data.activityData && res.data.activityData.length ===0){
+                this.isMyActivity = false
+              }else {
+                this.isMyActivity = true
+              }
             }else {
               this.isMyActivity = false
             }
@@ -289,6 +305,12 @@
           .then(res =>{
             if(res.data.status===200){
               this.$toast.success(res.data.msg)
+              this.$socket.emit('successActivity', {
+                id:this.$store.state.id,
+                name:this.$store.state.name,
+                position:this.$store.state.position,
+                departments:this.$store.state.department
+              })
               this.closeAddActivityDialog()
               this.getMyActivityData()
             }

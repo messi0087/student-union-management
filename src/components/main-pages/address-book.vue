@@ -46,7 +46,7 @@
                   slot="cover"
           />
           <template class="ant-card-actions" slot="actions">
-            <a-icon type="team" key="team"/>
+            <a-icon type="team" key="team" @click="onConnection()"/>
             <a :href='phone'>  <a-icon type="phone"  key="phone"/></a>
           </template>
           <a-card-meta :title="cardTitle" :description="cardDescription">
@@ -67,10 +67,11 @@
   import {Button, Input, Tree, Icon, Tooltip, Card, message, Avatar} from 'ant-design-vue'
   import * as userAPI from '../../api/user'
   import * as getData from '../../utils/get-position'
+  import Toast from 'muse-ui-toast';
 
 
   Vue.use(Button).use(message).use(Avatar).use(Input).use(Tree).use(Icon).use(Tooltip)
-    .use(Card)
+    .use(Card).use(Toast);
   Vue.config.productionTip = false
 
   export default {
@@ -87,7 +88,8 @@
         departmentTitle:'',
         departmentDescription:'',
         cardPhoneNumber:'',
-        phone:''
+        phone:'',
+        cardData:{},
       }
     },
     beforeMount(){
@@ -100,6 +102,7 @@
     methods: {
       onSelect(keys) {
         let cardData = this.getKeyData(this.bookData,keys[0])
+        this.cardData = cardData
         let condition = this.verifyData(cardData.title)
         //具体的人
         if(condition === -1 ) {
@@ -162,6 +165,19 @@
       },
       onExpand (expandedKeys) {
         this.expandedKeys = expandedKeys
+      },
+      onConnection(){
+        if(this.cardData.id !==this.$store.state.id) {
+          this.$router.push({
+            path: '/singleChat',
+            query: {
+              name: this.cardData.name,
+              id: this.cardData.id
+            }
+          })
+        }else {
+          this.$toast.error('不能选择自己进行通信，请选择其他用户')
+        }
       }
     }
   }

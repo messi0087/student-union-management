@@ -146,7 +146,7 @@
   let token = ''
 
   export default {
-    name: 'my-news',
+    name: 'my-information',
     data() {
       return {
         //修改密码
