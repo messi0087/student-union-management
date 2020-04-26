@@ -61,11 +61,6 @@ const routes = [
     path: '/singleChat',
     component: load('single-chat'),
     meta: {title: '聊天'},
-  },
-  {
-    path: '/test',
-    component: loadChild('control-message','chat/'),
-    meta: {title: '聊天'},
   }
 ];
 export default routes

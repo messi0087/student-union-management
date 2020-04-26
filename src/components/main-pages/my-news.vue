@@ -78,7 +78,8 @@
           })
           .catch(error=>console.log(error.message))
       },
-      navigationPage(data){
+      navigationPage(datas){
+        let data = datas.situation
         if( data ===0 ){
           this.$router.push({
             path:'/mainPages/commonFunctions',
@@ -102,6 +103,16 @@
             query: {
               functionShow:'0',
               defaultValue: 'meetingRequest'
+            }
+          })
+        }
+        else if(data === 3){
+      let item = datas.content.split('/')
+          this.$router.push({
+            path:'/singleChat',
+            query: {
+              name:item[1],
+              id: item[0]
             }
           })
         }

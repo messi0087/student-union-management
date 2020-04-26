@@ -15,7 +15,7 @@ Vue.use(MuseUI);
 
 //引入socket.io
 Vue.use(new VueSocketIO({
-  debug: true,
+  debug: false,
   connection: port
   // vuex: {
   // },

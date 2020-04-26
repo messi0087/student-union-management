@@ -26,7 +26,7 @@
                 class="text-input"
           />
         </div>
-          <mu-button @click="dataAdd()" class="send-button" round color="primary">发送</mu-button>
+          <mu-button @click="sendChatMessage()" class="send-button" round color="primary">发送</mu-button>
       </div>
     </footer>
   </div>
@@ -35,6 +35,11 @@
 <script>
   import topMessage from '../components/top-message'
   import message from '../components/chat/message'
+  import Cookies from "js-cookie";
+  const key = config.key
+  import Message from "muse-ui-message";
+  import * as userAPI from "../api/user";
+  import config from "../api/default";
 
   export default {
     name: "single-chat",
@@ -42,22 +47,106 @@
       topMessage,
       message
     },
+    sockets: {
+      // loginSuccess(msg){
+      //   // console.log(msg)
+      // },
+      messageTalk(data){
+        if(data.id ===this.$store.state.id){
+          this.$toast.message(data.msg)
+        }
+      },
+      chatSuccess(msg){
+        if(Number(msg.sendId) === Number(this.$route.query.id)) {
+          this.data.push(msg)
+        }
+      },
+      messageAnnouncement: function (data) {
+        if(data.id !==this.$store.state.id){
+          this.$toast.message(data.msg)
+        }
+      }
+    },
     updated(){
       this.scrollMessage()
     },
     mounted() {
+      if(!this.$route.query.name || !this.$route.query.id){
+        Message.alert('消息丢失，请重新选择想要聊天的人', '警告')
+          .then(res =>{
+            if(res.result) {
+              this.$router.replace('/mainPages/myNews')
+            }
+          })
+      }
       this.title = this.$route.query.name ? this.$route.query.name : '聊天窗口'
+      if(this.$store.state.id) {
+        this.$socket.emit('login', {id:this.$store.state.id,name:this.$store.state.name})
+      }
+      else {
+        let token = Cookies.get('authorization')
+        if(!token){
+          Message.alert('身份信息失效请重新登录', '提示')
+            .then(res =>{
+              if(res.result) {
+                this.$router.replace('/')
+              }
+            })
+        }
+        else {
+          userAPI.getCurrent(`${key} ${token}`)
+            .then(res => {
+              if(res.data.status === 200){
+                this.$store.commit('setToken',`${key} ${token}`)
+                this.$store.commit('setName',res.data.name)
+                this.$store.commit('setId',res.data.id)
+                this.$store.commit('setDepartment',res.data.departmentChoice)
+                this.$store.commit('setPosition',res.data.positionChoice)
+                this.$socket.emit('login', {id:this.$store.state.id,name:this.$store.state.name})
+              }else {
+                Message.alert('身份信息失效请重新登录', '提示')
+                  .then(res =>{
+                    if(res.result) {
+                      this.$router.replace('/')
+                    }
+                  })
+              }
+            })
+            .catch(()=>{
+              Message.alert('身份信息失效请重新登录', '提示')
+                .then(res =>{
+                  if(res.result) {
+                    this.$router.replace('/')
+                  }
+                })
+            })
+        }
+      }
     },
     data() {
       return {
         textValue: '',
-        data:[{time:'16:22',situation:0,content:'ssss'}],
+        data:[],
         title:'聊天窗口',
       }
     },
     methods:{
-      dataAdd(){
-        this.data.push({time:'16:22',situation:1,content:'ssss'})
+      sendChatMessage(){
+        if( this.textValue === ''){
+          return 0
+        }
+        let newDate = {
+          time:new Date().Format('hh:mm:ss'),
+          situation:2,
+          content:this.textValue,
+          id:this.$route.query.id,
+          name:this.$route.query.name,
+          sendId:this.$store.state.id,
+          sendName:this.$store.state.name
+        }
+        this.data.push(newDate)
+        this.$socket.emit('chat',newDate)
+        this.textValue =''
       },
       scrollMessage(){
         if(this.$refs.message && this.$refs.message.length !==0){
@@ -71,6 +160,9 @@
       clearInputText(){
         this.textValue =''
       }
+    },
+    destroyed() {
+      this.$socket.emit('loginOut',{id:this.$store.state.id,name:this.$store.state.name})
     }
   }
 </script>

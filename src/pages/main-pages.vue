@@ -37,9 +37,9 @@
   export default {
     name: "main-pages",
       sockets: {
-        connect: function () {
-          console.log('socket connected')
-        },
+        // connect: function () {
+        //   console.log('socket connected')
+        // },
         messageAnnouncement: function (data) {
           if(data.id !==this.$store.state.id){
             this.$toast.message(data.msg)
@@ -54,6 +54,11 @@
         messageActivity: function (data) {
           let condition = data.id.findIndex(item =>item ===this.$store.state.id)
           if(condition !== -1){
+            this.$toast.message(data.msg)
+          }
+        },
+        messageTalk(data){
+          if(data.id ===this.$store.state.id){
             this.$toast.message(data.msg)
           }
         }
@@ -85,7 +90,8 @@
               this.$router.replace('/')
             }
           })
-      }else {
+      }
+      else {
         userAPI.getCurrent(`${key} ${token}`)
         .then(res => {
           if(res.data.status === 200){

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="message-index" v-if="situation === 0">
+    <div class="message-index" v-if="situation === 1">
       <div class="left">
       <p>{{content}}</p>
     </div>
